@@ -12,7 +12,7 @@ from app.api import ingest, health, query_stream, documents
 # -------------------------
 # Chat routes
 # -------------------------
-from app.routes import chat, sessions, chat_stream
+from app.routes import auth, chat, sessions, chat_stream
 
 # -------------------------
 # Registry
@@ -26,16 +26,22 @@ app = FastAPI(title="RAG Accelerator")
 # -------------------------
 # We keep the local origins and add your deployed Vercel URL
 origins = [
-    "https://drag-eosin.vercel.app",  # Production
-    "http://localhost:5173",          # Local Vite default
-    "http://127.0.0.1:5173",          # Local IP default
-    "http://localhost:3000",          # Potential alternative local port
+    "https://drag-eosin.vercel.app",
+    "http://localhost:5173",
+    "http://localhost:5174",
+    "http://localhost:5175",
+    "http://localhost:5176",
+    "http://127.0.0.1:5173",
+    "http://127.0.0.1:5174",
+    "http://127.0.0.1:5175",
+    "http://127.0.0.1:5176",
+    "http://localhost:3000",
 ]
 
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
-    allow_credentials=False, # Set to True to support session cookies/auth headers
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -51,6 +57,11 @@ app.include_router(ingest.router)
 # -------------------------
 app.include_router(query_stream.router)   # /rag/query/stream
 app.include_router(documents.router)      # /documents
+
+# -------------------------
+# Auth APIs
+# -------------------------
+app.include_router(auth.router)           # /auth/signup, /auth/login
 
 # -------------------------
 # Chat APIs

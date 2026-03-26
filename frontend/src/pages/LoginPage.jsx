@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../store/chatStore";
+import { API_BASE } from "../config/api";
 import "./LoginPage.css";
 
 const AI_IMAGE =
@@ -12,11 +13,11 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const login = useChatStore((s) => s.login);
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
 
@@ -35,30 +36,51 @@ export default function LoginPage() {
       return;
     }
 
-    if (isSignUp) {
-      if (password !== confirmPassword) {
-        setError("Passwords do not match.");
-        return;
-      }
-      // Dummy sign-up: save to localStorage
-      const users = JSON.parse(localStorage.getItem("echo_users") || "{}");
-      if (users[email]) {
-        setError("An account with this email already exists.");
-        return;
-      }
-      users[email] = { password };
-      localStorage.setItem("echo_users", JSON.stringify(users));
-    } else {
-      // Dummy login: check localStorage
-      const users = JSON.parse(localStorage.getItem("echo_users") || "{}");
-      if (!users[email] || users[email].password !== password) {
-        setError("Invalid email or password.");
-        return;
-      }
+    if (isSignUp && password !== confirmPassword) {
+      setError("Passwords do not match.");
+      return;
     }
 
-    login(email);
-    navigate("/chat");
+    setLoading(true);
+
+    try {
+      const endpoint = isSignUp ? "/auth/signup" : "/auth/login";
+      const res = await fetch(`${API_BASE}${endpoint}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: email.trim().toLowerCase(), password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.detail || "Something went wrong.");
+        return;
+      }
+
+      // Save auth data
+      localStorage.setItem("echo_token", data.token);
+      localStorage.setItem("echo_auth_email", data.email);
+      localStorage.setItem("echo_user_id", data.user_id);
+
+      // Update store
+      useChatStore.setState({
+        isAuthenticated: true,
+        userEmail: data.email,
+        userId: data.user_id,
+        authToken: data.token,
+      });
+
+      navigate("/chat");
+    } catch (err) {
+      console.error("Auth error:", err);
+      setError(
+        "Cannot connect to server. Make sure the backend is running on " +
+        API_BASE
+      );
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -98,6 +120,7 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 autoComplete="email"
+                disabled={loading}
               />
             </div>
 
@@ -110,6 +133,7 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 autoComplete={isSignUp ? "new-password" : "current-password"}
+                disabled={loading}
               />
             </div>
 
@@ -123,12 +147,17 @@ export default function LoginPage() {
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   autoComplete="new-password"
+                  disabled={loading}
                 />
               </div>
             )}
 
-            <button type="submit" className="login-btn">
-              {isSignUp ? "Sign Up" : "Log In"}
+            <button type="submit" className="login-btn" disabled={loading}>
+              {loading
+                ? "Please wait..."
+                : isSignUp
+                  ? "Sign Up"
+                  : "Log In"}
             </button>
           </form>
 

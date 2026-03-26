@@ -3,8 +3,11 @@ import {
   createSession,
   fetchSessions,
   fetchDocuments,
+  fetchSessionMessages,
   updateSessionTitle,
   deleteSession as apiDeleteSession,
+  apiSignup,
+  apiLogin,
 } from "../services/chatApi";
 
 // Promise lock to prevent duplicate session creation
@@ -12,19 +15,52 @@ let _sessionCreatePromise = null;
 
 export const useChatStore = create((set, get) => ({
   /* =================================================
-     AUTH STATE
+     AUTH STATE (now backed by MongoDB)
      ================================================= */
-  isAuthenticated: !!localStorage.getItem("echo_auth_email"),
+  isAuthenticated: !!localStorage.getItem("echo_token"),
   userEmail: localStorage.getItem("echo_auth_email") || null,
+  userId: localStorage.getItem("echo_user_id") || null,
+  authToken: localStorage.getItem("echo_token") || null,
 
-  login: (email) => {
-    localStorage.setItem("echo_auth_email", email);
-    set({ isAuthenticated: true, userEmail: email });
+  login: async (email, password) => {
+    const data = await apiLogin(email, password);
+    localStorage.setItem("echo_token", data.token);
+    localStorage.setItem("echo_auth_email", data.email);
+    localStorage.setItem("echo_user_id", data.user_id);
+    set({
+      isAuthenticated: true,
+      userEmail: data.email,
+      userId: data.user_id,
+      authToken: data.token,
+    });
+  },
+
+  signup: async (email, password) => {
+    const data = await apiSignup(email, password);
+    localStorage.setItem("echo_token", data.token);
+    localStorage.setItem("echo_auth_email", data.email);
+    localStorage.setItem("echo_user_id", data.user_id);
+    set({
+      isAuthenticated: true,
+      userEmail: data.email,
+      userId: data.user_id,
+      authToken: data.token,
+    });
   },
 
   logout: () => {
+    localStorage.removeItem("echo_token");
     localStorage.removeItem("echo_auth_email");
-    set({ isAuthenticated: false, userEmail: null });
+    localStorage.removeItem("echo_user_id");
+    set({
+      isAuthenticated: false,
+      userEmail: null,
+      userId: null,
+      authToken: null,
+      sessions: [],
+      currentSessionId: null,
+      messages: [],
+    });
   },
 
   /* =================================================
@@ -109,7 +145,6 @@ export const useChatStore = create((set, get) => ({
   loading: false,
   error: null,
 
-  /* Prevents ChatHistoryItem crash */
   sessionSummaries: {},
 
   setSessionSummary: (id, summary) =>
@@ -124,16 +159,18 @@ export const useChatStore = create((set, get) => ({
      SESSION MANAGEMENT
      ================================================= */
   loadSessions: async () => {
-    const sessions = await fetchSessions();
-    set({ sessions });
+    try {
+      const sessions = await fetchSessions();
+      set({ sessions });
 
-    // Load documents alongside sessions (safe, async)
-    const docs = await fetchDocuments();
-    set({ documents: docs?.documents || [] });
+      const docs = await fetchDocuments();
+      set({ documents: docs?.documents || [] });
+    } catch (e) {
+      console.warn("Failed to load sessions:", e);
+    }
   },
 
   startNewSession: async () => {
-    // If a session creation is already in-flight, return that same promise
     if (_sessionCreatePromise) {
       return _sessionCreatePromise;
     }
@@ -163,9 +200,24 @@ export const useChatStore = create((set, get) => ({
     set({
       currentSessionId: sessionId,
       messages: [],
-      loading: false,
+      loading: true,
       error: null,
     });
+
+    // Load messages from MongoDB
+    try {
+      const msgs = await fetchSessionMessages(sessionId);
+      const formatted = msgs.map((m) => ({
+        role: m.role === "assistant" || m.role === "agent" ? "assistant" : m.role,
+        content: m.content,
+        timestamp: m.timestamp,
+        citations: [],
+      }));
+      set({ messages: formatted, loading: false });
+    } catch (e) {
+      console.warn("Failed to load messages:", e);
+      set({ messages: [], loading: false });
+    }
   },
 
   renameSession: async (sessionId, newTitle) => {
@@ -233,7 +285,6 @@ export const useChatStore = create((set, get) => ({
     const isFirstMessage = get().messages.length === 0;
     let sessionId = get().currentSessionId;
 
-    // If no session exists, create one on-the-fly (only from first message)
     if (!sessionId) {
       sessionId = await get().startNewSession();
     }
@@ -268,14 +319,12 @@ export const useChatStore = create((set, get) => ({
           ? raw
           : raw.slice(0, 47).replace(/\s+\S*$/, "") + "...";
 
-      // Update title in sidebar immediately (optimistic)
       set((state) => ({
         sessions: state.sessions.map((s) =>
           s.id === sessionId ? { ...s, title } : s
         ),
       }));
 
-      // Persist to backend (fire-and-forget)
       updateSessionTitle(sessionId, title).catch((e) =>
         console.warn("Failed to persist session title:", e)
       );

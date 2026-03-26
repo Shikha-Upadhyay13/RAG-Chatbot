@@ -8,4 +8,7 @@ groq
 python-dotenv
 rank-bm25
 faiss-cpu
+pymongo[srv]
+bcrypt
+pyjwt
 

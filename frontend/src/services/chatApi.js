@@ -1,8 +1,5 @@
 import { API_BASE } from "../config/api";
 
-
-
-// Loud warning instead of hard crash in dev
 if (!import.meta.env.VITE_API_BASE_URL) {
   console.warn(
     "[WARN] VITE_API_BASE_URL not set. Falling back to http://127.0.0.1:8000"
@@ -10,13 +7,52 @@ if (!import.meta.env.VITE_API_BASE_URL) {
 }
 
 /* =========================
+   Auth APIs
+========================= */
+
+export async function apiSignup(email, password) {
+  const res = await fetch(`${API_BASE}/auth/signup`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || "Signup failed");
+  }
+  return data;
+}
+
+export async function apiLogin(email, password) {
+  const res = await fetch(`${API_BASE}/auth/login`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) {
+    throw new Error(data.detail || "Login failed");
+  }
+  return data;
+}
+
+/* =========================
    Session APIs (JSON)
 ========================= */
 
+function getUserId() {
+  return localStorage.getItem("echo_user_id") || "";
+}
+
 export async function createSession() {
-  const res = await fetch(`${API_BASE}/sessions/new`, {
-    method: "POST",
-  });
+  const userId = getUserId();
+  const url = userId
+    ? `${API_BASE}/sessions/new?user_id=${encodeURIComponent(userId)}`
+    : `${API_BASE}/sessions/new`;
+
+  const res = await fetch(url, { method: "POST" });
 
   if (!res.ok) {
     throw new Error("Failed to create session");
@@ -26,7 +62,12 @@ export async function createSession() {
 }
 
 export async function fetchSessions() {
-  const res = await fetch(`${API_BASE}/sessions`);
+  const userId = getUserId();
+  const url = userId
+    ? `${API_BASE}/sessions?user_id=${encodeURIComponent(userId)}`
+    : `${API_BASE}/sessions`;
+
+  const res = await fetch(url);
 
   if (!res.ok) {
     throw new Error("Failed to fetch sessions");
@@ -66,6 +107,16 @@ export async function fetchSession(sessionId) {
 
   if (!res.ok) {
     throw new Error("Failed to fetch session");
+  }
+
+  return await res.json();
+}
+
+export async function fetchSessionMessages(sessionId) {
+  const res = await fetch(`${API_BASE}/sessions/${sessionId}/messages`);
+
+  if (!res.ok) {
+    throw new Error("Failed to fetch session messages");
   }
 
   return await res.json();

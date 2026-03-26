@@ -1,0 +1,109 @@
+from typing import List, Dict, Iterator, Literal
+import os
+
+# --------------------------------------------------
+# External provider (GROQ ONLY)
+# --------------------------------------------------
+
+from app.llm.groq import groq_chat, groq_stream
+
+# ==================================================
+# LLM ROLE DEFINITIONS
+# ==================================================
+
+LLMRole = Literal[
+    "planner",
+    "generator",
+    "summarizer",
+    "chat",
+    "tool",
+]
+
+# ==================================================
+# MODEL CONFIGURATION
+# ==================================================
+
+DEFAULT_GROQ_MODEL = os.getenv(
+    "GROQ_DEFAULT_MODEL",
+    "llama-3.1-8b-instant",
+)
+
+# ==================================================
+# PUBLIC LLM INTERFACE
+# ==================================================
+
+def generate_text(
+    *,
+    messages: List[Dict[str, str]],
+    role: LLMRole = "generator",
+    stream: bool = False,
+    provider: Literal["groq"] = "groq",
+) -> Iterator[str] | str:
+    """
+    Unified LLM entrypoint.
+    Only GROQ provider is supported.
+    """
+
+    if provider != "groq":
+        raise RuntimeError("Only GROQ provider is supported")
+
+    if stream:
+        return groq_stream(
+            messages=messages,
+            model=DEFAULT_GROQ_MODEL,
+        )
+
+    response = groq_chat(
+        messages=messages,
+        model=DEFAULT_GROQ_MODEL,
+    )
+
+    return response.choices[0].message.content.strip()
+
+
+# ==================================================
+# ROLE-SPECIFIC HELPERS
+# ==================================================
+
+def planner_llm(
+    messages: List[Dict[str, str]],
+    *,
+    stream: bool = False,
+):
+    return generate_text(
+        messages=messages,
+        role="planner",
+        stream=stream,
+    )
+
+
+def generator_llm(
+    messages: List[Dict[str, str]],
+    *,
+    stream: bool = True,
+):
+    return generate_text(
+        messages=messages,
+        role="generator",
+        stream=stream,
+    )
+
+
+def summarizer_llm(
+    messages: List[Dict[str, str]],
+):
+    return generate_text(
+        messages=messages,
+        role="summarizer",
+        stream=False,
+    )
+
+
+def tool_llm(
+    messages: List[Dict[str, str]],
+):
+    return generate_text(
+        messages=messages,
+        role="tool",
+        stream=False,
+    )

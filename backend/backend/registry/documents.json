@@ -1,0 +1,37 @@
+{
+  "ADK.pdf": {
+    "document_id": "ADK.pdf",
+    "pages": 64,
+    "chunks": 353
+  },
+  "Venkat-Vatshal.pdf": {
+    "document_id": "Venkat-Vatshal.pdf",
+    "pages": 2,
+    "chunks": 9
+  },
+  "Abdul_Rehaan.pdf": {
+    "document_id": "Abdul_Rehaan.pdf",
+    "pages": 2,
+    "chunks": 11
+  },
+  "T3.pdf": {
+    "document_id": "T3.pdf",
+    "pages": 1,
+    "chunks": 5
+  },
+  "VenkatVatshal Resume.pdf": {
+    "document_id": "VenkatVatshal Resume.pdf",
+    "pages": 2,
+    "chunks": 9
+  },
+  "Shikha_Project_Details.pdf": {
+    "document_id": "Shikha_Project_Details.pdf",
+    "pages": 4,
+    "chunks": 12
+  },
+  "Shikha-Upadhyay-Resume.pdf": {
+    "document_id": "Shikha-Upadhyay-Resume.pdf",
+    "pages": 2,
+    "chunks": 10
+  }
+}

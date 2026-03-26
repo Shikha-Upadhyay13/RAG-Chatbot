@@ -1,0 +1,298 @@
+:root {
+  /* ============================
+     Core background (existing)
+     ============================ */
+  --bg-main: #0b0f14;
+  --bg-panel: #0f141b;
+  --bg-panel-soft: #121922;
+
+  /* ============================
+     Borders (existing)
+     ============================ */
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-accent: rgba(45, 212, 191, 0.35);
+
+  /* ============================
+     Text (existing)
+     ============================ */
+  --text-primary: #e7ebef;
+  --text-secondary: #9aa7b2;
+  --text-muted: #6b7680;
+
+  /* ============================
+     Accent (existing)
+     ============================ */
+  --accent-main: #2dd4bf;
+  --accent-soft: #1faea1;
+  --accent-glow: rgba(45, 212, 191, 0.25);
+
+  /* ============================
+     Radius (existing)
+     ============================ */
+  --radius-lg: 14px;
+  --radius-md: 10px;
+
+  /* ============================
+     🔥 NEW — Depth & elevation
+     ============================ */
+  --bg-depth-1: #070a0f;
+  --bg-depth-2: #0d1219;
+  --bg-depth-3: #141c26;
+
+  /* ============================
+     🔥 NEW — Typography scale
+     ============================ */
+  --font-body: Inter, system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-heading: Manrope, Inter, system-ui, sans-serif;
+
+  --text-xs: 11px;
+  --text-sm: 13px;
+  --text-md: 14px;
+  --text-lg: 16px;
+  --text-xl: 20px;
+
+  /* ============================
+     🔥 NEW — Glow control
+     ============================ */
+  --glow-soft: 0 0 0 1px rgba(45, 212, 191, 0.08);
+  --glow-medium: 0 0 40px rgba(45, 212, 191, 0.18);
+}
+
+/* ============================
+   Global reset (existing)
+   ============================ */
+* {
+  box-sizing: border-box;
+}
+
+/* ============================
+   Body — upgraded, not replaced
+   ============================ */
+body {
+  margin: 0;
+
+  /* 🔥 Multi-layer background for richness */
+  background:
+    radial-gradient(
+      900px 500px at 12% -10%,
+      rgba(45, 212, 191, 0.06),
+      transparent 45%
+    ),
+    radial-gradient(
+      800px 600px at 85% 8%,
+      rgba(31, 174, 161, 0.10),
+      transparent 50%
+    ),
+    linear-gradient(
+      180deg,
+      var(--bg-depth-1) 0%,
+      var(--bg-main) 45%,
+      var(--bg-depth-2) 100%
+    );
+
+  color: var(--text-primary);
+  font-family: var(--font-body);
+
+  /* 🔥 Typography polish */
+  font-size: var(--text-md);
+  line-height: 1.6;
+  letter-spacing: 0.01em;
+
+  /* Rendering quality */
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ============================
+   Headings — richer hierarchy
+   ============================ */
+h1, h2, h3, h4, h5 {
+  font-family: var(--font-heading);
+  color: var(--text-primary);
+  letter-spacing: -0.015em;
+  margin: 0;
+}
+
+/* ============================
+   Utility text helpers
+   ============================ */
+.text-muted {
+  color: var(--text-muted);
+}
+
+.text-secondary {
+  color: var(--text-secondary);
+}
+
+/* ============================
+   🔥 NEW — INVISIBLE SCROLLBAR
+   (Allows scrolling but hides the bar)
+   ============================ */
+
+/* Hide scrollbar for Chrome, Safari and Opera */
+::-webkit-scrollbar {
+  display: none;
+}
+
+/* Hide scrollbar for IE, Edge and Firefox */
+* {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+/* Specific class for chat containers if needed */
+.hide-scrollbar {
+  overflow-y: auto;
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* ============================
+   Selection styling
+   ============================ */
+::selection {
+  background: rgba(45, 212, 191, 0.25);
+  color: #041d1a;
+}
+
+/* ============================
+   🔥 TRON BACKGROUND GRID
+   ============================ */
+.tron-bg {
+  mix-blend-mode: screen;
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+/* Grid lines */
+.tron-grid {
+  position: absolute;
+  inset: -200px;
+  background-image:
+    linear-gradient(
+      rgba(45, 212, 191, 0.06) 1px,
+      transparent 1px
+    ),
+    linear-gradient(
+      90deg,
+      rgba(45, 212, 191, 0.06) 1px,
+      transparent 1px
+    );
+  background-size: 60px 60px;
+  transform: perspective(800px) rotateX(65deg);
+  transform-origin: center;
+  opacity: 0.35;
+}
+
+/* Moving nodes */
+.tron-node {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  background: #2dd4bf;
+  border-radius: 50%;
+  box-shadow: 0 0 12px rgba(45, 212, 191, 0.8);
+  opacity: 0.8;
+  animation: drift 20s linear infinite;
+}
+
+.node-1 {
+  top: 20%;
+  left: 10%;
+  animation-duration: 26s;
+}
+
+.node-2 {
+  top: 60%;
+  left: 80%;
+  animation-duration: 32s;
+}
+
+.node-3 {
+  top: 40%;
+  left: 50%;
+  animation-duration: 22s;
+}
+
+@keyframes drift {
+  from {
+    transform: translate3d(0, 0, 0);
+  }
+  to {
+    transform: translate3d(220px, -320px, 0);
+  }
+}
+
+/* ============================
+   Ensure UI stays ABOVE grid
+   ============================ */
+.app-shell {
+  position: relative;
+  z-index: 2;
+}
+
+/* ============================
+   AI card micro glow separation
+   ============================ */
+.ai-glow {
+  position: relative;
+  backdrop-filter: blur(6px);
+}
+
+.ai-glow::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+
+  background:
+    radial-gradient(
+      120px 80px at top left,
+      rgba(45, 212, 191, 0.25),
+      transparent 70%
+    );
+
+  opacity: 0.45;
+  pointer-events: none;
+  z-index: -1;
+}
+
+/* ============================
+   🔥 ChatGPT-style typography normalization
+   ============================ */
+
+h1 {
+  font-size: var(--text-lg);
+  font-weight: 600;
+}
+
+h2 {
+  font-size: var(--text-md);
+  font-weight: 600;
+}
+
+h3, h4, h5 {
+  font-size: var(--text-md);
+  font-weight: 500;
+}
+
+p, div {
+  font-size: inherit;
+}
+
+.ai-glow,
+.ai-glow * {
+  line-height: 1.65;
+}
+
+.chat-greeting {
+  font-size: var(--text-md);
+  font-weight: 400;
+}

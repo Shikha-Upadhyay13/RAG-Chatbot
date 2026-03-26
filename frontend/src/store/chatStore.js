@@ -7,6 +7,9 @@ import {
   deleteSession as apiDeleteSession,
 } from "../services/chatApi";
 
+// Promise lock to prevent duplicate session creation
+let _sessionCreatePromise = null;
+
 export const useChatStore = create((set, get) => ({
   /* =================================================
      AUTH STATE
@@ -29,12 +32,32 @@ export const useChatStore = create((set, get) => ({
      ================================================= */
   sidebarOpen: true,
   hoveredSessionId: null,
+  settingsOpen: false,
 
   toggleSidebar: () =>
     set((s) => ({ sidebarOpen: !s.sidebarOpen })),
 
   setHoveredSession: (id) =>
     set({ hoveredSessionId: id }),
+
+  openSettings: () => set({ settingsOpen: true }),
+  closeSettings: () => set({ settingsOpen: false }),
+
+  /* =================================================
+     APPEARANCE / THEME
+     ================================================= */
+  theme: localStorage.getItem("echo_theme") || "dark",
+  accentColor: localStorage.getItem("echo_accent") || "#2dd4bf",
+
+  setTheme: (theme) => {
+    localStorage.setItem("echo_theme", theme);
+    set({ theme });
+  },
+
+  setAccentColor: (color) => {
+    localStorage.setItem("echo_accent", color);
+    set({ accentColor: color });
+  },
 
   /* =================================================
      MODES
@@ -109,37 +132,31 @@ export const useChatStore = create((set, get) => ({
     set({ documents: docs?.documents || [] });
   },
 
-  _creatingSession: false,
-
   startNewSession: async () => {
-    // Guard against duplicate concurrent calls
-    if (get()._creatingSession) {
-      // Wait for the in-flight creation to finish
-      while (get()._creatingSession) {
-        await new Promise((r) => setTimeout(r, 50));
+    // If a session creation is already in-flight, return that same promise
+    if (_sessionCreatePromise) {
+      return _sessionCreatePromise;
+    }
+
+    _sessionCreatePromise = (async () => {
+      try {
+        const session = await createSession();
+
+        set((state) => ({
+          sessions: [session, ...state.sessions],
+          currentSessionId: session.id,
+          messages: [],
+          loading: false,
+          error: null,
+        }));
+
+        return session.id;
+      } finally {
+        _sessionCreatePromise = null;
       }
-      return get().currentSessionId;
-    }
+    })();
 
-    set({ _creatingSession: true });
-
-    try {
-      const session = await createSession();
-
-      set((state) => ({
-        sessions: [session, ...state.sessions],
-        currentSessionId: session.id,
-        messages: [],
-        loading: false,
-        error: null,
-        _creatingSession: false,
-      }));
-
-      return session.id;
-    } catch (e) {
-      set({ _creatingSession: false });
-      throw e;
-    }
+    return _sessionCreatePromise;
   },
 
   loadSession: async (sessionId) => {
@@ -216,13 +233,9 @@ export const useChatStore = create((set, get) => ({
     const isFirstMessage = get().messages.length === 0;
     let sessionId = get().currentSessionId;
 
+    // If no session exists, create one on-the-fly (only from first message)
     if (!sessionId) {
-      try {
-        sessionId = await get().startNewSession();
-      } catch (e) {
-        console.error("Failed to create session:", e);
-        return;
-      }
+      sessionId = await get().startNewSession();
     }
 
     const timestamp = new Date().toISOString();

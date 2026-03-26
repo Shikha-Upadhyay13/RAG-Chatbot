@@ -7,10 +7,12 @@ const SIDEBAR_WIDTH = 260;
 export default function ChatContainer() {
   const messages = useChatStore((s) => s.messages);
   const sidebarOpen = useChatStore((s) => s.sidebarOpen);
+  const theme = useChatStore((s) => s.theme);
   const hasMessages = messages.length > 0;
+  const isDark = theme === "dark";
 
   return (
-    <div style={styles.container}>
+    <div style={{ ...styles.container, background: isDark ? "#141418" : "#f8fafc" }}>
       <div
         style={{
           ...styles.inner,
@@ -20,10 +22,10 @@ export default function ChatContainer() {
       >
         {!hasMessages && (
           <div style={styles.emptyState}>
-            <h1 style={styles.title}>
+            <h1 style={{ ...styles.title, color: isDark ? "#e7ebef" : "#1e293b" }}>
               What can I help you figure out?
             </h1>
-            <p style={styles.subtitle}>
+            <p style={{ ...styles.subtitle, color: isDark ? "#9ca3af" : "#64748b" }}>
               Ask anything — explanations, comparisons,
               or deep dives.
             </p>

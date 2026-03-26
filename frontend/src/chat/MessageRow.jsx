@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useChatStore } from "../store/chatStore";
 import Message from "../components/Message";
 import SourceCitations from "../components/SourceCitations";
 
@@ -9,6 +10,8 @@ export default function MessageRow({
   timestamp,
 }) {
   const isUser = role === "user";
+  const theme = useChatStore((s) => s.theme);
+  const isDark = theme === "dark";
   const [copied, setCopied] = useState(false);
   const [hovered, setHovered] = useState(null);
 
@@ -56,8 +59,8 @@ export default function MessageRow({
         style={{
           maxWidth: isUser ? "85%" : "90%",
           padding: isUser ? "12px 14px" : "0px",
-          background: isUser ? "#1f2933" : "transparent",
-          color: "#e5e7eb",
+          background: isUser ? (isDark ? "#1f2933" : "#e2e8f0") : "transparent",
+          color: isDark ? "#e5e7eb" : "#1e293b",
           borderRadius: isUser ? "12px" : "0px",
           whiteSpace: "pre-wrap",
           wordBreak: "break-word",

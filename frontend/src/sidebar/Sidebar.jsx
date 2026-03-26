@@ -26,6 +26,8 @@ export default function Sidebar() {
     loadDocuments,
     userEmail,
     logout,
+    theme,
+    accentColor,
   } = useChatStore();
 
   const navigate = useNavigate();
@@ -37,11 +39,20 @@ export default function Sidebar() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
+  // Only show the current session (even if untitled) + sessions that have a real title
+  const visibleSessions = sessions.filter(
+    (s) =>
+      s.id === currentSessionId ||
+      (s.title && s.title !== "New Chat")
+  );
+
   const filteredSessions = searchQuery.trim()
-    ? sessions.filter((s) =>
+    ? visibleSessions.filter((s) =>
         (s.title || "").toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : sessions;
+    : visibleSessions;
+
+  const isDark = theme === "dark";
 
   return (
     <div
@@ -50,14 +61,15 @@ export default function Sidebar() {
         transform: sidebarOpen
           ? "translateX(0)"
           : "translateX(-100%)",
+        background: isDark ? "#000" : "#f1f5f9",
       }}
     >
       {/* HEADER */}
       <div style={styles.header}>
-        <span style={styles.brand}>ECHO</span>
+        <span style={{ ...styles.brand, color: isDark ? "#e5e7eb" : "#1e293b" }}>ECHO</span>
         <button
           onClick={toggleSidebar}
-          style={styles.collapseBtn}
+          style={{ ...styles.collapseBtn, color: isDark ? "#94a3b8" : "#64748b" }}
         >
           {sidebarOpen ? "⟨" : "⟩"}
         </button>
@@ -65,7 +77,7 @@ export default function Sidebar() {
 
       {/* NEW CHAT */}
       <button
-        style={styles.newChat}
+        style={{ ...styles.newChat, background: `linear-gradient(135deg, ${accentColor}, #2979ff)` }}
         onClick={startNewSession}
       >
         + New Chat

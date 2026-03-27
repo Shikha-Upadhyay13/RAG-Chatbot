@@ -3,6 +3,7 @@ uvicorn
 python-multipart
 pypdf
 python-docx
+openpyxl
 google-genai
 groq
 python-dotenv

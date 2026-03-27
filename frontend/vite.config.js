@@ -1,7 +1,18 @@
 import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 
-// https://vite.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    host: '127.0.0.1',
+    proxy: {
+      '/ingest': 'http://127.0.0.1:8000',
+      '/auth': 'http://127.0.0.1:8000',
+      '/sessions': 'http://127.0.0.1:8000',
+      '/chat': 'http://127.0.0.1:8000',
+      '/rag': 'http://127.0.0.1:8000',
+      '/documents': 'http://127.0.0.1:8000',
+      '/health': 'http://127.0.0.1:8000',
+    },
+  },
 })

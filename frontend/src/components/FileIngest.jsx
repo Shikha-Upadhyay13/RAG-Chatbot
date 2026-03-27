@@ -1,5 +1,6 @@
 import { useState, useRef } from "react";
 import { useChatStore } from "../store/chatStore";
+import { API_BASE } from "../config/api";
 
 export default function FileIngest() {
   const registerDocument = useChatStore(
@@ -22,7 +23,7 @@ export default function FileIngest() {
     formData.append("file", file);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/ingest/file", {
+      const res = await fetch(`${API_BASE}/ingest/file`, {
         method: "POST",
         body: formData,
       });
@@ -45,7 +46,7 @@ export default function FileIngest() {
       <input
         ref={fileInputRef}
         type="file"
-        accept=".pdf,.doc,.docx"
+        accept=".pdf,.doc,.docx,.xlsx,.xls"
         style={{ display: "none" }}
         onChange={(e) => setFile(e.target.files[0])}
       />

@@ -117,7 +117,7 @@ export default function MessageInput({ hasMessages, sidebarOpen }) {
     formData.append("file", file);
 
     const res = await fetch(
-      "http://127.0.0.1:8000/ingest/file",
+      "/ingest/file",
       { method: "POST", body: formData }
     );
 
@@ -134,16 +134,11 @@ export default function MessageInput({ hasMessages, sidebarOpen }) {
 
   return (
     <div
-      className="altaric-dock"
-      style={{
-        position: hasMessages ? "fixed" : "relative",
-        bottom: hasMessages ? 20 : "auto",
-        left: hasMessages && sidebarOpen ? 260 : 0,
-        transition: "left 0.25s ease",
-        background: hasMessages
-          ? `linear-gradient(180deg, ${isDark ? "rgba(20,20,24,0)" : "rgba(248,250,252,0)"}, ${isDark ? "rgba(20,20,24,0.85)" : "rgba(248,250,252,0.85)"})`
-          : "transparent",
-      }}
+      className={`altaric-dock ${hasMessages ? "altaric-dock--fixed" : "altaric-dock--inline"}`}
+      style={hasMessages ? {
+        left: sidebarOpen ? 272 : 0,
+        transition: "left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+      } : {}}
     >
       <div className="altaric-bar">
         <div className="altaric-gradient-border" style={{
@@ -176,7 +171,7 @@ export default function MessageInput({ hasMessages, sidebarOpen }) {
               ref={textareaRef}
               value={text}
               style={{ color: isDark ? "#e7ebef" : "#1e293b" }}
-              placeholder="Ask ECHO AI"
+              placeholder="Ask Nexus AI"
               onChange={(e) => setText(e.target.value)}
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {

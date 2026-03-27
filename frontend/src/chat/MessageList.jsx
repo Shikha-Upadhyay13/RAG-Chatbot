@@ -47,7 +47,7 @@ const styles = {
   stream: {
     flex: 1,
     overflowY: "auto",
-    padding: "36px 48px 180px",
+    padding: "28px 48px 180px",
     pointerEvents: "auto",
 
     // ✅ NEW: smoother scrolling & modern feel

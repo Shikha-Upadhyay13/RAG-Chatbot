@@ -1,11 +1,5 @@
 import { API_BASE } from "../config/api";
 
-if (!import.meta.env.VITE_API_BASE_URL) {
-  console.warn(
-    "[WARN] VITE_API_BASE_URL not set. Falling back to http://127.0.0.1:8000"
-  );
-}
-
 /* =========================
    Auth APIs
 ========================= */
@@ -43,7 +37,7 @@ export async function apiLogin(email, password) {
 ========================= */
 
 function getUserId() {
-  return localStorage.getItem("echo_user_id") || "";
+  return localStorage.getItem("nexus_user_id") || "";
 }
 
 export async function createSession() {
@@ -120,6 +114,70 @@ export async function fetchSessionMessages(sessionId) {
   }
 
   return await res.json();
+}
+
+/* =========================
+   User Profile & Settings APIs
+========================= */
+
+export async function fetchUserProfile() {
+  const userId = getUserId();
+  if (!userId) throw new Error("Not logged in");
+
+  const res = await fetch(`${API_BASE}/auth/me?user_id=${encodeURIComponent(userId)}`);
+  if (!res.ok) throw new Error("Failed to fetch profile");
+  return await res.json();
+}
+
+export async function fetchLoginHistory(limit = 20) {
+  const userId = getUserId();
+  if (!userId) throw new Error("Not logged in");
+
+  const res = await fetch(
+    `${API_BASE}/auth/login-history?user_id=${encodeURIComponent(userId)}&limit=${limit}`
+  );
+  if (!res.ok) throw new Error("Failed to fetch login history");
+  return await res.json();
+}
+
+export async function fetchUserSettings() {
+  const userId = getUserId();
+  if (!userId) throw new Error("Not logged in");
+
+  const res = await fetch(`${API_BASE}/auth/settings?user_id=${encodeURIComponent(userId)}`);
+  if (!res.ok) throw new Error("Failed to fetch settings");
+  return await res.json();
+}
+
+export async function updateUserSettings(settings) {
+  const userId = getUserId();
+  if (!userId) throw new Error("Not logged in");
+
+  const res = await fetch(`${API_BASE}/auth/settings?user_id=${encodeURIComponent(userId)}`, {
+    method: "PATCH",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(settings),
+  });
+  if (!res.ok) throw new Error("Failed to update settings");
+  return await res.json();
+}
+
+export async function changePassword(currentPassword, newPassword) {
+  const userId = getUserId();
+  if (!userId) throw new Error("Not logged in");
+
+  const res = await fetch(`${API_BASE}/auth/change-password?user_id=${encodeURIComponent(userId)}`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  });
+
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.detail || "Failed to change password");
+  return data;
 }
 
 /* =========================

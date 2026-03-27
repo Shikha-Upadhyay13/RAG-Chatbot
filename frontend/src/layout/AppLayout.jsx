@@ -13,7 +13,6 @@ export default function AppLayout() {
   const theme = useChatStore((s) => s.theme);
   const accentColor = useChatStore((s) => s.accentColor);
 
-  // Apply theme + accent color to CSS variables globally
   useEffect(() => {
     const root = document.documentElement;
     const isDark = theme === "dark";
@@ -40,41 +39,59 @@ export default function AppLayout() {
   const isDark = theme === "dark";
 
   return (
-    <div style={{ ...styles.root, background: isDark ? "#141414" : "#f8fafc", color: isDark ? "#e6edf3" : "#1e293b" }}>
+    <div style={{ ...styles.root, background: isDark ? "#0f0f14" : "#f8fafc", color: isDark ? "#e6edf3" : "#1e293b" }}>
       {/* LEFT SIDEBAR */}
       <Sidebar />
 
-      {/* FLOATING SIDEBAR HANDLE */}
-      {!sidebarOpen && (
-        <div
-          style={styles.sidebarHandle}
-          onClick={toggleSidebar}
-        >
-          ❯
-        </div>
-      )}
-
-      {/* PROFILE ICON — top right */}
-      <div style={styles.profileCorner}>
-        <ProfileMenu />
-      </div>
-
-      {/* MAIN CHAT */}
+      {/* MAIN AREA */}
       <div
         style={{
-          ...styles.main,
-          marginLeft: sidebarOpen ? 260 : 0,
-          marginRight: 0,
-          background: isDark ? "#141414" : "#f8fafc",
+          ...styles.mainWrap,
+          marginLeft: sidebarOpen ? 272 : 0,
         }}
       >
-        <div
-          style={{
-            ...styles.chatShell,
-            pointerEvents: "auto",
-            zIndex: 1,
-          }}
-        >
+        {/* TOP BAR */}
+        <div style={{
+          ...styles.topBar,
+          background: isDark ? "rgba(15,15,20,0.8)" : "rgba(248,250,252,0.85)",
+          borderBottom: `1px solid ${isDark ? "rgba(255,255,255,0.06)" : "rgba(0,0,0,0.06)"}`,
+        }}>
+          <div style={styles.topBarLeft}>
+            {!sidebarOpen && (
+              <button onClick={toggleSidebar} style={{
+                ...styles.menuBtn,
+                color: isDark ? "#94a3b8" : "#64748b",
+                background: isDark ? "rgba(255,255,255,0.05)" : "rgba(0,0,0,0.04)",
+              }}>
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                  <line x1="3" y1="6" x2="21" y2="6" />
+                  <line x1="3" y1="12" x2="15" y2="12" />
+                  <line x1="3" y1="18" x2="18" y2="18" />
+                </svg>
+              </button>
+            )}
+            <div style={styles.topBarBrand}>
+              <svg width="22" height="22" viewBox="0 0 48 48" fill="none">
+                <rect width="48" height="48" rx="10" fill="url(#tb-grad)" />
+                <path d="M14 24h6l4-8 4 16 4-8h6" stroke="#fff" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                <defs>
+                  <linearGradient id="tb-grad" x1="0" y1="0" x2="48" y2="48">
+                    <stop stopColor="#6366f1" />
+                    <stop offset="1" stopColor="#8b5cf6" />
+                  </linearGradient>
+                </defs>
+              </svg>
+              <span style={{ fontSize: 14, fontWeight: 700, letterSpacing: "1.5px", color: isDark ? "#e5e7eb" : "#1e293b" }}>
+                NEXUS
+              </span>
+            </div>
+          </div>
+
+          <ProfileMenu />
+        </div>
+
+        {/* CHAT AREA */}
+        <div style={styles.chatArea}>
           <MemoChatContainer />
         </div>
       </div>
@@ -89,74 +106,57 @@ const styles = {
   root: {
     display: "flex",
     height: "100vh",
-    background: "#141414",
-    color: "#e6edf3",
     overflow: "hidden",
     position: "relative",
   },
 
-  main: {
+  mainWrap: {
     flex: 1,
-    height: "100%",
-    background: "#141414",
-    transition: "margin 0.25s ease",
-    position: "relative",
-    zIndex: 1,
-  },
-
-  chatShell: {
-    position: "relative",
-    height: "100%",
-  },
-
-  profileCorner: {
-    position: "fixed",
-    top: 16,
-    right: 20,
-    zIndex: 50,
-  },
-
-  sidebarHandle: {
-    position: "fixed",
-    left: 0,
-    top: "50%",
-    transform: "translateY(-50%)",
-    background: "#020617",
-    border: "1px solid #1f2937",
-    borderLeft: "none",
-    padding: "10px 8px",
-    cursor: "pointer",
-    borderRadius: "0 6px 6px 0",
-    zIndex: 30,
-    color: "#67e8f9",
-  },
-
-  /* ⬇️ kept intentionally (future feature / no deletion) */
-  sourcesPanel: {
-    position: "fixed",
-    right: 0,
-    top: 0,
-    width: 360,
-    height: "100vh",
-    background: "#020617",
-    borderLeft: "1px solid #1f2937",
-    transition: "transform 0.25s ease",
-    zIndex: 20,
     display: "flex",
     flexDirection: "column",
+    height: "100vh",
+    transition: "margin-left 0.3s cubic-bezier(0.4, 0, 0.2, 1)",
+    overflow: "hidden",
   },
 
-  sourcesHeader: {
-    padding: "14px 18px",
-    fontSize: 14,
-    fontWeight: 600,
-    borderBottom: "1px solid #1f2937",
-    color: "#67e8f9",
+  topBar: {
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "space-between",
+    padding: "10px 20px",
+    flexShrink: 0,
+    backdropFilter: "blur(16px)",
+    WebkitBackdropFilter: "blur(16px)",
+    zIndex: 10,
   },
 
-  sourcesBody: {
+  topBarLeft: {
+    display: "flex",
+    alignItems: "center",
+    gap: 12,
+  },
+
+  topBarBrand: {
+    display: "flex",
+    alignItems: "center",
+    gap: 10,
+  },
+
+  menuBtn: {
+    width: 36,
+    height: 36,
+    borderRadius: 10,
+    border: "none",
+    cursor: "pointer",
+    display: "flex",
+    alignItems: "center",
+    justifyContent: "center",
+    transition: "background 0.15s",
+  },
+
+  chatArea: {
     flex: 1,
-    overflowY: "auto",
-    padding: "16px 18px",
+    overflow: "hidden",
+    position: "relative",
   },
 };

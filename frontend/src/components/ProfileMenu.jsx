@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../store/chatStore";
+import { fetchUserProfile } from "../services/chatApi";
 
 export default function ProfileMenu() {
   const userEmail = useChatStore((s) => s.userEmail);
@@ -10,7 +11,16 @@ export default function ProfileMenu() {
 
   const [open, setOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState(null);
+  const [userPlan, setUserPlan] = useState("free");
   const menuRef = useRef(null);
+
+  useEffect(() => {
+    if (open) {
+      fetchUserProfile()
+        .then((data) => setUserPlan(data.plan || "free"))
+        .catch(() => {});
+    }
+  }, [open]);
 
   // Derive initials & display name from email
   const displayName = userEmail
@@ -45,7 +55,7 @@ export default function ProfileMenu() {
   const menuItems = [
     {
       key: "profile",
-      label: "My Echo",
+      label: "My Nexus",
       icon: (
         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
           <circle cx="12" cy="8" r="4" />
@@ -113,7 +123,7 @@ export default function ProfileMenu() {
           {/* PLAN / USAGE */}
           <div style={styles.planRow}>
             <span style={styles.planLabel}>Plan</span>
-            <span style={styles.planBadge}>Pro</span>
+            <span style={styles.planBadge}>{userPlan.charAt(0).toUpperCase() + userPlan.slice(1)}</span>
           </div>
 
           <div style={styles.divider} />
@@ -150,7 +160,7 @@ export default function ProfileMenu() {
 
           {/* FOOTER */}
           <div style={styles.footer}>
-            ECHO AI &middot; {domain || "echo.ai"}
+            NEXUS AI &middot; {domain || "nexus.ai"}
           </div>
         </div>
       )}

@@ -17,16 +17,16 @@ export const useChatStore = create((set, get) => ({
   /* =================================================
      AUTH STATE (now backed by MongoDB)
      ================================================= */
-  isAuthenticated: !!localStorage.getItem("echo_token"),
-  userEmail: localStorage.getItem("echo_auth_email") || null,
-  userId: localStorage.getItem("echo_user_id") || null,
-  authToken: localStorage.getItem("echo_token") || null,
+  isAuthenticated: !!localStorage.getItem("nexus_token"),
+  userEmail: localStorage.getItem("nexus_auth_email") || null,
+  userId: localStorage.getItem("nexus_user_id") || null,
+  authToken: localStorage.getItem("nexus_token") || null,
 
   login: async (email, password) => {
     const data = await apiLogin(email, password);
-    localStorage.setItem("echo_token", data.token);
-    localStorage.setItem("echo_auth_email", data.email);
-    localStorage.setItem("echo_user_id", data.user_id);
+    localStorage.setItem("nexus_token", data.token);
+    localStorage.setItem("nexus_auth_email", data.email);
+    localStorage.setItem("nexus_user_id", data.user_id);
     set({
       isAuthenticated: true,
       userEmail: data.email,
@@ -37,9 +37,9 @@ export const useChatStore = create((set, get) => ({
 
   signup: async (email, password) => {
     const data = await apiSignup(email, password);
-    localStorage.setItem("echo_token", data.token);
-    localStorage.setItem("echo_auth_email", data.email);
-    localStorage.setItem("echo_user_id", data.user_id);
+    localStorage.setItem("nexus_token", data.token);
+    localStorage.setItem("nexus_auth_email", data.email);
+    localStorage.setItem("nexus_user_id", data.user_id);
     set({
       isAuthenticated: true,
       userEmail: data.email,
@@ -49,9 +49,9 @@ export const useChatStore = create((set, get) => ({
   },
 
   logout: () => {
-    localStorage.removeItem("echo_token");
-    localStorage.removeItem("echo_auth_email");
-    localStorage.removeItem("echo_user_id");
+    localStorage.removeItem("nexus_token");
+    localStorage.removeItem("nexus_auth_email");
+    localStorage.removeItem("nexus_user_id");
     set({
       isAuthenticated: false,
       userEmail: null,
@@ -82,16 +82,16 @@ export const useChatStore = create((set, get) => ({
   /* =================================================
      APPEARANCE / THEME
      ================================================= */
-  theme: localStorage.getItem("echo_theme") || "dark",
-  accentColor: localStorage.getItem("echo_accent") || "#2dd4bf",
+  theme: localStorage.getItem("nexus_theme") || "dark",
+  accentColor: localStorage.getItem("nexus_accent") || "#2dd4bf",
 
   setTheme: (theme) => {
-    localStorage.setItem("echo_theme", theme);
+    localStorage.setItem("nexus_theme", theme);
     set({ theme });
   },
 
   setAccentColor: (color) => {
-    localStorage.setItem("echo_accent", color);
+    localStorage.setItem("nexus_accent", color);
     set({ accentColor: color });
   },
 
